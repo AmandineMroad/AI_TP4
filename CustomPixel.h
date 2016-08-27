@@ -18,15 +18,21 @@ class CustomPixel {
 public:
     CustomPixel(int valeur, CustomPixel * voisinHaut, CustomPixel * voisinGauche);
 
-    void SetEtiquette(int etiquette);
-    int GetEtiquette() const;
-    
     //Mapping
     static CustomPixel** imageToCustomPixelArray(IplImage * image);
     static IplImage * CustomPixelArrayToImage(CustomPixel** pixels, int nbLignes, int nbColonnes);
-    char GetValeur() const;
+    
+    //Getters/Setters
+    void SetEtiquette(int etiquette);
+    int GetEtiquette() const;
     CustomPixel* GetVGauche() const;
     CustomPixel* GetVHaut() const;
+    char GetValeur() const;
+    
+    //Utils
+    bool isNotNull();
+    
+    
     
 private:
     char valeur;
