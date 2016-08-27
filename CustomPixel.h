@@ -8,6 +8,7 @@
 #define CUSTOMPIXEL_H
 
 #include <opencv2/core/types_c.h>
+#include <opencv2/core/core_c.h>
 
 #include <stddef.h>
 

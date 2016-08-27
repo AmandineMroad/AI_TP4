@@ -36,7 +36,7 @@ CustomPixel** CustomPixel::imageToCustomPixelArray(IplImage * image){
     int width = image->width;
     int height = image->height;
     
-    pixels = new CustomPixel[width][height];
+    CustomPixel** pixels = new CustomPixel*[width];
     
     int i,j;
     CustomPixel * haut,
@@ -59,7 +59,7 @@ CustomPixel** CustomPixel::imageToCustomPixelArray(IplImage * image){
             }
             
             //Création du pixel
-            pixels[i][j] = new CustomPixel(cvGet2D(image,i,j).val[0], haut, gauche);
+            pixels[i][j] = *(new CustomPixel(cvGet2D(image,i,j).val[0], haut, gauche));
         }
     }
     
