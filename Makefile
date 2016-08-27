@@ -2,14 +2,18 @@ LIBS = `pkg-config opencv --libs --cflags`
 OPT = -c -Wall
 
 all: etiquetage
-    @echo "All done"
+	@echo "All done"
 
-etiquetage: etiquetage.o
-	g++ etiquetage.o -o etiquetage ${LIBS}
-	@echo "etiquetage -o OK"
+etiquetage: main.o CustomPixel.o
+	g++ ${OPT} main.o CustomPixel.o -o etiquetage ${LIBS}
+	@echo "etiquetage OK"
 
-etiquetage.o: etiquetage.cpp
-	g++ ${OPT} etiquetage.cpp ${LIBS}
+main.o: main.cpp
+	g++ ${OPT} main.cpp ${LIBS}
+	@echo "etiquetage OK"
+
+CustomPixel.o: CustomPixel.cpp
+	g++ ${OPT} CustomPixel.cpp ${LIBS}
 	@echo "etiquetage OK"
 
 clean :
