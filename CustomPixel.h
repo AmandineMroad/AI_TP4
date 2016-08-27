@@ -25,6 +25,8 @@ public:
     static CustomPixel** imageToCustomPixelArray(IplImage * image);
     static IplImage * CustomPixelArrayToImage(CustomPixel** pixels, int nbLignes, int nbColonnes);
     char GetValeur() const;
+    CustomPixel* GetVGauche() const;
+    CustomPixel* GetVHaut() const;
     
 private:
     char valeur;

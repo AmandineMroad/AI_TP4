@@ -18,6 +18,13 @@ char CustomPixel::GetValeur() const {
     return valeur;
 }
 
+CustomPixel* CustomPixel::GetVGauche() const {
+    return vGauche;
+}
+
+CustomPixel* CustomPixel::GetVHaut() const {
+    return vHaut;
+}
 
 void CustomPixel::SetEtiquette(int etiquette) {
     this->etiquette = etiquette;
