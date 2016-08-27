@@ -4,12 +4,12 @@ OPT = -c -Wall
 all: etiquetage
 	@echo "All done"
 
-etiquetage: main.o CustomPixel.o
-	g++ ${OPT} main.o CustomPixel.o -o etiquetage ${LIBS}
+etiquetage: etiquetage.o CustomPixel.o
+	g++ ${OPT} etiquetage.o CustomPixel.o -o etiquetage ${LIBS}
 	@echo "etiquetage OK"
 
-main.o: main.cpp
-	g++ ${OPT} main.cpp ${LIBS}
+etiquetage.o: etiquetage.cpp
+	g++ ${OPT} etiquetage.cpp ${LIBS}
 	@echo "etiquetage OK"
 
 CustomPixel.o: CustomPixel.cpp
