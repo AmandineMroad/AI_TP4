@@ -86,3 +86,8 @@ IplImage* CustomPixelArrayToImage(CustomPixel** pixels, int nbLignes, int nbColo
     
     return img;
 }
+
+bool CustomPixel::isNotNull(){
+    if (this == NULL) return false;
+    else return true;
+}
