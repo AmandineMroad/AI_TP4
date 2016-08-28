@@ -58,22 +58,23 @@ CustomPixel** CustomPixel::imageToCustomPixelArray(IplImage * image){
     for (i=0; i<nbLigne; i++){
         pixels[i] = new CustomPixel*[nbCol];
         for (j=0; j<nbCol; j++){
-            //Si pixel de début de ligne
+            //première ligne (pas de voisin haut)
             if (i == 0) {
-                gauche = NULL;
-            } else {
-                gauche = pixels[i-1][j];
-            }
-            
-            //si pixel de début de colonne
-            if (j == 0) {
                 haut = NULL;
             } else {
-                haut = pixels[i][j-1];
+                haut = pixels[i-1][j];
+            }
+            
+            //première colonne (pas de voisin gauche)
+            if (j == 0) {
+                gauche = NULL;
+            } else {
+                gauche = pixels[i][j-1];
             }
             
             //Création du pixel
             pixels[i][j] = new CustomPixel(cvGet2D(image,i,j).val[0], haut, gauche);
+            cout<<pixels[i][j]<<endl;
         }
     }
     cout<<"imageToCustomPixelArray ends"<<endl;
@@ -95,6 +96,15 @@ IplImage* CustomPixel::CustomPixelArrayToImage(CustomPixel** pixels, int nbLigne
 }
 
 bool CustomPixel::isNotNull(){
+    cout<<" NULL : "<<(this == NULL)<<endl;
     if (this == NULL) return false;
     else return true;
+}
+
+ostream& CustomPixel::operator <<(ostream& flux){ 
+    flux<<"Pixel : {valeur: "<<this->GetValeur()
+            <<", e: "<<this->GetEtiquette()
+            <<", vHaut: "<<this->GetVHaut()
+            <<", vGau: "<<this->GetVGauche();
+    return flux;    
 }

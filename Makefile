@@ -5,7 +5,7 @@ all: etiquetage
 	@echo "All done"
 
 etiquetage: etiquetage.o CustomPixel.o
-	g++ etiquetage.o CustomPixel.o -o etiquetage ${LIBS}
+	g++ -g etiquetage.o CustomPixel.o -o etiquetage ${LIBS}
 	@echo "programme OK"
 
 etiquetage.o: etiquetage.cpp
