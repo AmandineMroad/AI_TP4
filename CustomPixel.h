@@ -9,6 +9,7 @@
 
 #include <opencv2/core/types_c.h>
 #include <opencv2/core/core_c.h>
+#include <iostream>
 
 #include <stddef.h>
 

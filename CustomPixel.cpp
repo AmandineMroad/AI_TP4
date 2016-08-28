@@ -18,11 +18,9 @@ char CustomPixel::GetValeur() const {
     return valeur;
 }
 
-
 void CustomPixel::SetValeur(char valeur) {
     this->valeur = valeur;
 }
-
 
 CustomPixel* CustomPixel::GetVGauche() const {
     return vGauche;
@@ -47,42 +45,44 @@ int CustomPixel::GetEtiquette() const {
  * @return le tableau de CustomPixel correspondant à l'image
  */
 CustomPixel** CustomPixel::imageToCustomPixelArray(IplImage * image){
-    int width = image->width;
-    int height = image->height;
+    cout<<"imageToCustomPixelArray begins"<<endl;
+    int nbCol = image->width;
+    int nbLigne = image->height;
     
-    CustomPixel** pixels = new CustomPixel*[width];
+    CustomPixel*** pixels = new CustomPixel**[nbLigne];
     
     int i,j;
     CustomPixel * haut,
             * gauche;
     
-    for (i=0; i<width; i++){
-        for (j=0; j<height; j++){
+    for (i=0; i<nbLigne; i++){
+        pixels[i] = new CustomPixel*[nbCol];
+        for (j=0; j<nbCol; j++){
             //Si pixel de début de ligne
             if (i == 0) {
                 gauche = NULL;
             } else {
-                gauche = &pixels[i-1][j];
+                gauche = pixels[i-1][j];
             }
             
             //si pixel de début de colonne
             if (j == 0) {
                 haut = NULL;
             } else {
-                haut = &pixels[i][j-1];
+                haut = pixels[i][j-1];
             }
             
             //Création du pixel
-            pixels[i][j] = *(new CustomPixel(cvGet2D(image,i,j).val[0], haut, gauche));
+            pixels[i][j] = new CustomPixel(cvGet2D(image,i,j).val[0], haut, gauche);
         }
     }
-    
-    return pixels;
+    cout<<"imageToCustomPixelArray ends"<<endl;
+    return *pixels;
 }
 
 IplImage* CustomPixel::CustomPixelArrayToImage(CustomPixel** pixels, int nbLignes, int nbColonnes){
     IplImage* img = cvCreateImage(cvSize(nbLignes,nbColonnes),IPL_DEPTH_8U,1);
-    
+    cout<<"CustomPixelArrayToImage begins"<<endl;
     int i,j,offset;
     for (i=0; i<nbLignes ; i++){
         offset = i*nbColonnes;
@@ -90,7 +90,7 @@ IplImage* CustomPixel::CustomPixelArrayToImage(CustomPixel** pixels, int nbLigne
             img->imageData[j+offset] = pixels[i][j].GetValeur();
         }
     }
-    
+    cout<<"CustomPixelArrayToImage ends"<<endl;
     return img;
 }
 
