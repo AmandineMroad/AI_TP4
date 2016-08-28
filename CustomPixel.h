@@ -33,6 +33,7 @@ public:
     
     //Utils
     bool isNotNull();
+    ostream& operator<<(ostream &flux);
     
     
 private:

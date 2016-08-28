@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
  */
 bool isValidCommand(int nbArgs, char** args) {
     //Verification du nombre d'arguments
-    if (nbArgs != 3) {
+    if (nbArgs != 2) {
         cerr << "Utilisation: \n\t etiquetage <nom_fichier_image>" << endl;
         return false;
     }
@@ -66,8 +66,9 @@ bool isValidCommand(int nbArgs, char** args) {
 int** equivTable = new int*;
 
 CustomPixel** algoEtiquetage(CustomPixel** pixels) {
-    int width = imageBase->width;
-    int height = imageBase->height;
+    cout<<"algoEtiq begins"<<endl;
+    int nbCol = imageBase->width;
+    int nbLigne = imageBase->height;
 
     int i, j, eh, eg;
     CustomPixel* pixel,
@@ -75,19 +76,47 @@ CustomPixel** algoEtiquetage(CustomPixel** pixels) {
             * vg;
     int numero = 0;
 
-    for (i = 0; i < width; i++) {
-        for (j = 0; j < height; j++) {
+    //TODO delete
+    int cptPix=0, cptCont =0;
+    
+    for (i = 0; i < nbLigne; i++) {
+        /***DEBUG */ //TODO Del
+         cout<<"ligne "<<i
+                <<": pix non blancs = "<<cptPix
+                <<" _ contours = "<<cptCont<<endl;
+                
+                /******/
+        for (j = 0; j < nbCol; j++) {
+            pixel = &pixels[i][j];
             if (pixel->GetValeur() == 0) {
+                cout<<"f, "<<endl;
                 pixel->SetValeur(255); //TODO delete
             } //Si le pixel n'est pas de la couleur du fond (blanc))
             else {
-                pixel = &pixels[i][j];
+                
+                /***DEBUG */ //TODO Del
+                cout<<"p, "<<endl;
+                cptPix++;
+                /****/
                 vh = pixel->GetVHaut();
+                cout<<"getVHaut : "<<pixel->GetVHaut()
+                        <<" _ vh : "<<vh<<endl;
                 vg = pixel->GetVGauche();
+                cout<<"getVG : "<<pixel->GetVGauche()
+                        <<" _ vg : "<<vg<<endl;
 
                 //Si le pixel a deux voisins
-                if (vg->isNotNull() && vh->isNotNull()) {
+                if ((vg)->isNotNull() && (vh)->isNotNull()) {
+                    cout<<"vg = null : "<<(vg == NULL)
+                            << " _ vg* = null : "
+                            <<(*vg).isNotNull()
+                            <<" / vh = null : "<<(vh == NULL)
+                            <<" / vh = isnotnull : "<<vh->isNotNull()
+                            << " _ vh* = null : "
+                            <<(*vh).isNotNull()
+                            <<endl; //TODO del
                     eh = vh->GetEtiquette();
+                    
                     eg = vg->GetEtiquette();
 
                     if (eh == eg) {
@@ -99,6 +128,10 @@ CustomPixel** algoEtiquetage(CustomPixel** pixels) {
 
                 }//Si le pixel a au moins un voisin null
                 else {
+                    /***DEBUG */ //TODO Del
+                    cout<<"au moins un voisin null"<<endl;
+                cptCont++;
+                /****/
                     //si le pixel n'a aucun voisin
                     if (!vg->isNotNull() && !vh->isNotNull()) {
                         pixel->SetEtiquette(numero++);
@@ -116,16 +149,21 @@ CustomPixel** algoEtiquetage(CustomPixel** pixels) {
                             pixel->SetEtiquette(numero++);
                         }
                     }
+                //TODO Del
+                cout<<"numero = "<<numero<<endl;
                 }
             }
         }
     }
+    cout<<"FIN ALGO _ nbEtiquette = "<<numero<<endl;
     return pixels;
 }
 
 IplImage* getEtiquetage() {
+    cout<<"getEtiq begins"<<endl;
     CustomPixel** pixels = CustomPixel::imageToCustomPixelArray(imageBase);
-    pixels = algoEtiquetage(pixels);
+    //pixels = algoEtiquetage(pixels);
     IplImage * img = CustomPixel::CustomPixelArrayToImage(pixels, imageBase->height, imageBase->width);
+    cout<<"getEtiq ends"<<endl;
     return img;
 }
