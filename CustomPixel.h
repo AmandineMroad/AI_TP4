@@ -20,7 +20,7 @@ public:
 
     //Mapping
     static CustomPixel** imageToCustomPixelArray(IplImage * image);
-    static IplImage * CustomPixelArrayToImage(CustomPixel** pixels, int nbLignes, int nbColonnes);
+    static IplImage* CustomPixelArrayToImage(CustomPixel** pixels, int nbLignes, int nbColonnes);
     
     //Getters/Setters
     void SetEtiquette(int etiquette);
@@ -28,10 +28,10 @@ public:
     CustomPixel* GetVGauche() const;
     CustomPixel* GetVHaut() const;
     char GetValeur() const;
+    void SetValeur(char valeur);
     
     //Utils
     bool isNotNull();
-    
     
     
 private:

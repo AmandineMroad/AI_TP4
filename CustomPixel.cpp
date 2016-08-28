@@ -18,6 +18,12 @@ char CustomPixel::GetValeur() const {
     return valeur;
 }
 
+
+void CustomPixel::SetValeur(char valeur) {
+    this->valeur = valeur;
+}
+
+
 CustomPixel* CustomPixel::GetVGauche() const {
     return vGauche;
 }
@@ -28,6 +34,7 @@ CustomPixel* CustomPixel::GetVHaut() const {
 
 void CustomPixel::SetEtiquette(int etiquette) {
     this->etiquette = etiquette;
+    this->valeur = 0;//TODO delete
 }
 
 int CustomPixel::GetEtiquette() const {
@@ -73,7 +80,7 @@ CustomPixel** CustomPixel::imageToCustomPixelArray(IplImage * image){
     return pixels;
 }
 
-IplImage* CustomPixelArrayToImage(CustomPixel** pixels, int nbLignes, int nbColonnes){
+IplImage* CustomPixel::CustomPixelArrayToImage(CustomPixel** pixels, int nbLignes, int nbColonnes){
     IplImage* img = cvCreateImage(cvSize(nbLignes,nbColonnes),IPL_DEPTH_8U,1);
     
     int i,j,offset;
