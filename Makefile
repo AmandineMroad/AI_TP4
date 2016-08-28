@@ -18,3 +18,5 @@ CustomPixel.o: CustomPixel.cpp
 
 clean :
 	rm *o etiquetage
+	
+cleanAndBuild : clean etiquetage
