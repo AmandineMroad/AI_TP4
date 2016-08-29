@@ -44,7 +44,7 @@ int CustomPixel::GetEtiquette() const {
  * @param image l'image à convertir
  * @return le tableau de CustomPixel correspondant à l'image
  */
-CustomPixel** CustomPixel::imageToCustomPixelArray(IplImage * image){
+CustomPixel*** CustomPixel::imageToCustomPixelArray(IplImage * image){
     cout<<"imageToCustomPixelArray begins"<<endl;
     int nbCol = image->width;
     int nbLigne = image->height;
@@ -74,11 +74,10 @@ CustomPixel** CustomPixel::imageToCustomPixelArray(IplImage * image){
             
             //Création du pixel
             pixels[i][j] = new CustomPixel(cvGet2D(image,i,j).val[0], haut, gauche);
-            cout<<pixels[i][j]<<endl;
         }
     }
     cout<<"imageToCustomPixelArray ends"<<endl;
-    return *pixels;
+    return pixels;
 }
 
 IplImage* CustomPixel::CustomPixelArrayToImage(CustomPixel** pixels, int nbLignes, int nbColonnes){
@@ -96,7 +95,6 @@ IplImage* CustomPixel::CustomPixelArrayToImage(CustomPixel** pixels, int nbLigne
 }
 
 bool CustomPixel::isNotNull(){
-    cout<<" NULL : "<<(this == NULL)<<endl;
     if (this == NULL) return false;
     else return true;
 }
