@@ -20,7 +20,7 @@ public:
     CustomPixel(int valeur, CustomPixel * voisinHaut, CustomPixel * voisinGauche);
 
     //Mapping
-    static CustomPixel** imageToCustomPixelArray(IplImage * image);
+    static CustomPixel*** imageToCustomPixelArray(IplImage * image);
     static IplImage* CustomPixelArrayToImage(CustomPixel** pixels, int nbLignes, int nbColonnes);
     
     //Getters/Setters
