@@ -87,22 +87,30 @@ IplImage* algoEtiquetage(const IplImage* image) {
 
             //Si le pixel n'appartient pas au fond (ici <230)
             if (cvGet2D(image, i, j).val[0] < 230) {
+                cout << "pixel>230";
                 imgEtiq->imageData[j + offset] = 255; //TODO del
 
                 if (i == 0 && j == 0) { //premier pixel
+                    cout << "first" << endl;
                     e = currentEtiq++;
                 } else if (i == 0) { //première ligne (pas de voisin haut)
+                    cout << "1st line" << endl;
                     eg = mat[i][j - 1];
                     if (eg != -1) { //le voisin gauche porte une etiquette
                         e = eg;
+                        cout << "etiq à gauche" << endl;
                     } else {
+                        cout << "current + " << endl;
                         e = currentEtiq++;
                     }
                 } else if (j == 0) { //première colonne (pas de voisin gauche)
+                    cout << "1st col" << endl;
                     eh = mat[i - 1][j];
                     if (eh != -1) {
+                        cout << "etiq en haut" << endl;
                         e = eh;
                     } else {
+                        cout << "current + " << endl;
                         e = currentEtiq++;
                     }
                 } else { //le pixel a deux voisins
@@ -111,18 +119,24 @@ IplImage* algoEtiquetage(const IplImage* image) {
 
                     if (eh == eg) {
                         //Les deux voisins ont la meme etiquette
-                        e = eh;
-                    } else {
-                        //Aucun voisin n'a d'étiquette
-                        if (eh == -1 && eg == -1) {
+                        if (eh == -1) {
                             e = currentEtiq++;
-                        } else if (eh == -1 || eg == -1) {
+                            cout << "current + " << endl;
+                        } else {
+                            e = eh;
+                            cout << "same etiq " << endl;
+                        }
+
+                    } else {
+                        //les voisins ont des etiquettes differentes
+                         if (eh == -1 || eg == -1) {
                             //Un des voisins n'a pas d'étiquette
                             e = max(eh, eg);
+                            cout << " un vois sans e" << endl;
                         } else {
-                            //les voisins ont des etiquettes differentes
                             e = min(eh, eg);
-                            addEquivalence(eh,eg);
+                            cout << "equiv ! " << endl;
+                            addEquivalence(eh, eg);
                         }
                     }
                 }
@@ -132,38 +146,47 @@ IplImage* algoEtiquetage(const IplImage* image) {
             mat[i][j] = e;
         }
     }
+    cout << "fin etiquetage nb etiq = " << currentEtiq << endl;
     return imgEtiq;
 }
 
 //Map d'équivalence
-map<int, int[0] > equivMap;
+map<int, int* > equivMap;
+
 void addEquivalence(int e1, int e2) {
-    cout<<"call: addEquivalence("<<e1<<","<<e2<<")"<<endl;
-    
+    cout << "call: addEquivalence(" << e1 << "," << e2 << ")" << endl;
+
     // e1 doit être inférieur à e2
-    if(e1 > e2) swap(e1,e2);
-    
+    if (e1 > e2) swap(e1, e2);
+
     int* list_tmp = equivMap[e1];
     if (list_tmp == NULL) {//map.count()
         //la paire n'existe pas
-        list_tmp = new int[1];
+        list_tmp = new int[2];
         list_tmp[0] = e2;
-        
+        list_tmp[1] = 0;
         equivMap.insert(make_pair(e1, list_tmp));
     } else {
-        const int size = ARRAY_SIZE(list_tmp) + 1;
-        int newList[] = new int[size];
+        //Calcul de la taille du tableau d'équivalence de e1
+        int cpt = 0;
+        while (list_tmp[cpt++] != 0);
+        const int size = cpt + 1;
+
+        int *newList = new int[size];
         //copie de la liste precedente
         for (int i = 0; i < size - 2; i++) {
-            newList[i] = list_tmp[i];
             if (newList[i] == e2) {
                 //e2 est deja dans la liste d'equivalence de e1
                 delete[] newList;
                 return;
             }
+            newList[i] = list_tmp[i];
+
         }
         //insertion du dernier element
-        newList[size - 1] = e2;
+        newList[size - 2] = e2;
+        newList[size - 1] = 0;
+
         //stockage de la nouvelle list et destruction de l'ancienne
         equivMap[e1] = newList;
         delete[] list_tmp;
