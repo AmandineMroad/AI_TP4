@@ -4,21 +4,25 @@
 #include <opencv2/highgui/highgui_c.h>
 #include <iostream>
 #include <algorithm>
+#include <opencv2/imgproc/imgproc.hpp>
 
 
 #include "CustomPixel.h"
 
+#define ARRAY_SIZE(array) (sizeof((array))/sizeof((array[0])))
 
 const char * const W_BASE = "Image initiale";
 const char * const W_ETIQ = "Image etiquetée";
 
 using namespace std;
+using namespace cv;
 
-IplImage * imageBase;
+const IplImage * imageBase;
 
 bool isValidCommand(int nbArgs, char** args);
 inline IplImage* getEtiquetage();
-CustomPixel*** algoEtiquetage(CustomPixel*** pixels);
+IplImage* algoEtiquetage(const IplImage* image);
+void addEquivalence(int e1, int e2);
 
 int main(int argc, char** argv) {
     //verification des arguments du proramme
@@ -30,7 +34,7 @@ int main(int argc, char** argv) {
 
     //Affichage des images
     cvShowImage(W_BASE, imageBase);
-    cvShowImage(W_ETIQ, getEtiquetage());
+    cvShowImage(W_ETIQ, algoEtiquetage(imageBase));
 
     //Attente d'une entrée clavier
     cvWaitKey();
@@ -63,99 +67,105 @@ bool isValidCommand(int nbArgs, char** args) {
     return true;
 }
 
-int** equivTable = new int*;
+IplImage* algoEtiquetage(const IplImage* image) {
+    const int nbLignes = image->height;
+    const int nbCol = image->width;
+    IplImage* imgEtiq = cvCreateImage(cvSize(nbCol, nbLignes), IPL_DEPTH_8U, 1);
 
-CustomPixel*** algoEtiquetage(CustomPixel*** pixels) {
-    cout<<"algoEtiquetage begins"<<endl;
-    int nbLigne = imageBase->height;
-    int nbCol = imageBase->width;
+    //Création de la matrice d'étiquettes
+    int ** mat = new int*[nbLignes];
 
-    CustomPixel* pixel,
-            * vh,
-            * vg;
+    int i, j, e, eh, eg;
+    int currentEtiq = 0;
 
-    int currentEtiq = 0, eh, eg;
-    int i, j;
-    //Parcours du tableau de CustomPixels
-    for (i = 0; i < nbLigne; i++) {
+    //Parcours de l'image
+    for (i = 0; i < nbLignes; i++) {
+        int offset = i*nbCol; //TODO del
+        mat[i] = new int[nbCol];
         for (j = 0; j < nbCol; j++) {
-            pixel = pixels[i][j];
-            //Traitement si le pixel n'appartient pas au fond (non blanc)
-            if (pixel->GetValeur() > 250) {
+            e = -1;
 
-            } else {
-                //Récupération des voisins haut et gauche
-                vh = pixel->GetVHaut();
-                vg = pixel->GetVGauche();
+            //Si le pixel n'appartient pas au fond (ici <230)
+            if (cvGet2D(image, i, j).val[0] < 230) {
+                imgEtiq->imageData[j + offset] = 255; //TODO del
 
-                //Si le pixel a deux voisins
-                if (vh->isNotNull() && vg->isNotNull()) {
-                    eh = vh->GetEtiquette();
-                    eg = vg->GetEtiquette();
+                if (i == 0 && j == 0) { //premier pixel
+                    e = currentEtiq++;
+                } else if (i == 0) { //première ligne (pas de voisin haut)
+                    eg = mat[i][j - 1];
+                    if (eg != -1) { //le voisin gauche porte une etiquette
+                        e = eg;
+                    } else {
+                        e = currentEtiq++;
+                    }
+                } else if (j == 0) { //première colonne (pas de voisin gauche)
+                    eh = mat[i - 1][j];
+                    if (eh != -1) {
+                        e = eh;
+                    } else {
+                        e = currentEtiq++;
+                    }
+                } else { //le pixel a deux voisins
+                    eh = mat[i - 1][j];
+                    eg = mat[i][j - 1];
 
-                    //Les deux voisins ont la même etiquette
                     if (eh == eg) {
-                        if (eh == -1) { //les étiquettes sont nulles
-                            pixel->SetEtiquette(currentEtiq++);
+                        //Les deux voisins ont la meme etiquette
+                        e = eh;
+                    } else {
+                        //Aucun voisin n'a d'étiquette
+                        if (eh == -1 && eg == -1) {
+                            e = currentEtiq++;
+                        } else if (eh == -1 || eg == -1) {
+                            //Un des voisins n'a pas d'étiquette
+                            e = max(eh, eg);
                         } else {
-                            pixel->SetEtiquette(eh);
-                        }
-                        
-                    }
-                    //Les voisins ont des etiquettes différentes
-                    else {
-                        //le voisin haut n'a pas d'étiquette
-                        if (eh == -1) {
-                            pixel->SetEtiquette(eg);
-                        }
-                        //le voisin gauche n'a pas d'étiquette
-                        else if (eg == -1) {
-                            pixel->SetEtiquette(eh);
-                        } 
-                        //les étiquettes existent et sont différentes
-                        else {
-                            pixel->SetEtiquette(min(eh,eg));
-                            //TODO equiv
-                        }
-                    }
-
-                }//Si le pixel a au moins un voisin null
-                else {
-                    //les deux voisins sont null
-                    if (!vh->isNotNull() && !vg->isNotNull()) {
-                        pixel->SetEtiquette(currentEtiq++);
-                    }//un des deux voisins est null
-                    else {
-                        CustomPixel* voisin;
-                        if (vh->isNotNull()) {
-                            voisin = vh;
-                        } else {
-                            voisin = vg;
-                        }
-                        
-                        //Verification de l'étiquette du voisin
-                        eh = voisin->GetEtiquette();
-                        if (eh >= 0){
-                            pixel->SetEtiquette(eh);
-                        } else {
-                            pixel->SetEtiquette(currentEtiq++);
+                            //les voisins ont des etiquettes differentes
+                            e = min(eh, eg);
+                            addEquivalence(eh,eg);
                         }
                     }
                 }
-
+            } else {
+                imgEtiq->imageData[j + offset] = 0;
             }
+            mat[i][j] = e;
         }
     }
-    cout<<"algoEtiquetage ends, currentEtiq = "<<currentEtiq<<endl;
-    return pixels;
+    return imgEtiq;
 }
 
-IplImage* getEtiquetage() {
-    cout << "getEtiq begins" << endl;
-    CustomPixel*** pixels = CustomPixel::imageToCustomPixelArray(imageBase);
-    pixels = algoEtiquetage(pixels);
-    //IplImage * img = CustomPixel::CustomPixelArrayToImage(pixels, imageBase->height, imageBase->width);
-    IplImage * img = NULL;
-    cout << "getEtiq ends" << endl;
-    return img;
+//Map d'équivalence
+map<int, int[0] > equivMap;
+void addEquivalence(int e1, int e2) {
+    cout<<"call: addEquivalence("<<e1<<","<<e2<<")"<<endl;
+    
+    // e1 doit être inférieur à e2
+    if(e1 > e2) swap(e1,e2);
+    
+    int* list_tmp = equivMap[e1];
+    if (list_tmp == NULL) {//map.count()
+        //la paire n'existe pas
+        list_tmp = new int[1];
+        list_tmp[0] = e2;
+        
+        equivMap.insert(make_pair(e1, list_tmp));
+    } else {
+        const int size = ARRAY_SIZE(list_tmp) + 1;
+        int newList[] = new int[size];
+        //copie de la liste precedente
+        for (int i = 0; i < size - 2; i++) {
+            newList[i] = list_tmp[i];
+            if (newList[i] == e2) {
+                //e2 est deja dans la liste d'equivalence de e1
+                delete[] newList;
+                return;
+            }
+        }
+        //insertion du dernier element
+        newList[size - 1] = e2;
+        //stockage de la nouvelle list et destruction de l'ancienne
+        equivMap[e1] = newList;
+        delete[] list_tmp;
+    }
 }

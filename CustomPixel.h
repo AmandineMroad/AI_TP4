@@ -9,6 +9,7 @@
 
 #include <opencv2/core/types_c.h>
 #include <opencv2/core/core_c.h>
+#include <opencv2/legacy/compat.hpp>
 #include <iostream>
 
 #include <stddef.h>
@@ -21,14 +22,14 @@ public:
 
     //Mapping
     static CustomPixel*** imageToCustomPixelArray(IplImage * image);
-    static IplImage* CustomPixelArrayToImage(CustomPixel** pixels, int nbLignes, int nbColonnes);
+    static IplImage* CustomPixelArrayToImage(CustomPixel*** pixels, int nbLignes, int nbColonnes);
     
     //Getters/Setters
     void SetEtiquette(int etiquette);
     int GetEtiquette() const;
     CustomPixel* GetVGauche() const;
     CustomPixel* GetVHaut() const;
-    char GetValeur() const;
+    int GetValeur() const;
     void SetValeur(char valeur);
     
     //Utils
@@ -37,7 +38,7 @@ public:
     
     
 private:
-    char valeur;
+    int valeur;
     int etiquette;
     CustomPixel * vHaut;
     CustomPixel * vGauche;

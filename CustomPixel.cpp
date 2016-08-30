@@ -6,15 +6,16 @@
  */
 
 #include "CustomPixel.h"
-
+int cpt=0;
 CustomPixel::CustomPixel(int couleur, CustomPixel * voisinHaut, CustomPixel * voisinGauche){
+   if(couleur < 127) cout<<"create pixel "<<cpt++<<" with value :"<<couleur<<endl;
  this->valeur = couleur;
  this->vHaut = voisinHaut;
  this->vGauche = voisinGauche;
  this->etiquette = -1;
 }
 
-char CustomPixel::GetValeur() const {
+int CustomPixel::GetValeur() const {
     return valeur;
 }
 
@@ -51,12 +52,13 @@ CustomPixel*** CustomPixel::imageToCustomPixelArray(IplImage * image){
     
     CustomPixel*** pixels = new CustomPixel**[nbLigne];
     
-    int i,j;
+    int i,j, offset;
     CustomPixel * haut,
             * gauche;
     
     for (i=0; i<nbLigne; i++){
         pixels[i] = new CustomPixel*[nbCol];
+        offset = i*nbCol;
         for (j=0; j<nbCol; j++){
             //première ligne (pas de voisin haut)
             if (i == 0) {
@@ -72,26 +74,33 @@ CustomPixel*** CustomPixel::imageToCustomPixelArray(IplImage * image){
                 gauche = pixels[i][j-1];
             }
             
+            
             //Création du pixel
             pixels[i][j] = new CustomPixel(cvGet2D(image,i,j).val[0], haut, gauche);
+            //pixels[i][j] = new CustomPixel(image->imageData[j+offset], haut, gauche);
         }
     }
     cout<<"imageToCustomPixelArray ends"<<endl;
     return pixels;
 }
 
-IplImage* CustomPixel::CustomPixelArrayToImage(CustomPixel** pixels, int nbLignes, int nbColonnes){
-    IplImage* img = cvCreateImage(cvSize(nbLignes,nbColonnes),IPL_DEPTH_8U,1);
+IplImage* CustomPixel::CustomPixelArrayToImage(CustomPixel*** pixels, int nbLignes, int nbColonnes) {
+    IplImage* img = cvCreateImage(cvSize(nbColonnes, nbLignes), IPL_DEPTH_8U,1);
     cout<<"CustomPixelArrayToImage begins"<<endl;
     int i,j,offset;
-    for (i=0; i<nbLignes ; i++){
+    CustomPixel* pixel;
+    //Parcours du tableau de CustomPixels
+    for (i=0; i<nbLignes; i++){
         offset = i*nbColonnes;
         for(j=0; j<nbColonnes; j++){
-            img->imageData[j+offset] = pixels[i][j].GetValeur();
+            pixel = pixels[i][j];
+            //insertion de la nouvelle valeur du pixel
+            if(j%100 == 0)cout<<"Set pixel in image data: "<<pixel->GetValeur()<<endl;
+            img->imageData[j+offset]= pixel->GetValeur();
         }
     }
     cout<<"CustomPixelArrayToImage ends"<<endl;
-    return img;
+    return img;   
 }
 
 bool CustomPixel::isNotNull(){
@@ -103,6 +112,7 @@ ostream& CustomPixel::operator <<(ostream& flux){
     flux<<"Pixel : {valeur: "<<this->GetValeur()
             <<", e: "<<this->GetEtiquette()
             <<", vHaut: "<<this->GetVHaut()
-            <<", vGau: "<<this->GetVGauche();
+            <<", vGau: "<<this->GetVGauche()
+            <<"}";
     return flux;    
 }
